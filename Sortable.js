@@ -54,7 +54,7 @@
 		document = win.document,
 		parseInt = win.parseInt,
 
-		supportDraggable = !!('draggable' in document.createElement('div')),
+		supportDraggable = false,
 
 		_silent = false,
 
@@ -479,12 +479,22 @@
 
 				ghostEl = dragEl.cloneNode(true);
 
-				_css(ghostEl, 'top', rect.top - parseInt(css.marginTop, 10));
-				_css(ghostEl, 'left', rect.left - parseInt(css.marginLeft, 10));
+				var pos = {top: 0, left: 0};
+				var el = dragEl;
+				while (true) {
+					pos.top += el.scrollTop || 0;
+					pos.left += el.scrollLeft || 0;
+					el = el.parentNode;
+					var stylePosition = _css(el, 'position');
+					if (!el || stylePosition == 'absolute' || stylePosition == 'relative') break;
+				}
+
+				_css(ghostEl, 'top', dragEl.offsetTop - pos.top);
+				_css(ghostEl, 'left', dragEl.offsetLeft - pos.left);
 				_css(ghostEl, 'width', rect.width);
 				_css(ghostEl, 'height', rect.height);
 				_css(ghostEl, 'opacity', '0.8');
-				_css(ghostEl, 'position', 'fixed');
+				_css(ghostEl, 'position', 'absolute');
 				_css(ghostEl, 'zIndex', '100000');
 
 				rootEl.appendChild(ghostEl);
@@ -922,7 +932,11 @@
 
 
 	function _on(el, event, fn) {
-		el.addEventListener(event, fn, false);
+		el.addEventListener(event, function (e) {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			fn(e);
+		}, false);
 	}
 
 
