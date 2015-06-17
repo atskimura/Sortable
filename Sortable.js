@@ -305,7 +305,9 @@
 
 			// Prepare `dragstart`
 			this._prepareDragStart(evt, touch, target);
-			return true;
+
+			evt.preventDefault();
+			evt.stopImmediatePropagation();
 		},
 
 		_prepareDragStart: function (/** Event */evt, /** Touch */touch, /** HTMLElement */target) {
@@ -357,14 +359,18 @@
 			}
 		},
 
-		_disableDelayedDrag: function () {
+		_disableDelayedDrag: function (/** Event|TouchEvent */evt) {
 			var ownerDocument = this.el.ownerDocument;
 
 			clearTimeout(this._dragStartTimer);
 
 			_off(ownerDocument, 'mousemove', this._disableDelayedDrag);
 			_off(ownerDocument, 'touchmove', this._disableDelayedDrag);
-			return true;
+
+			if (evt) {
+				evt.preventDefault();
+				evt.stopImmediatePropagation();
+			}
 		},
 
 		_triggerDragStart: function (/** Touch */touch) {
@@ -458,7 +464,6 @@
 				_css(ghostEl, 'transform', translate3d);
 
 				evt.preventDefault();
-				return true;
 			}
 		},
 
@@ -755,7 +760,9 @@
 
 				// Save sorting
 				this.save();
-				return true;
+				
+				evt.preventDefault();
+				evt.stopImmediatePropagation();
 			}
 		},
 
@@ -936,12 +943,7 @@
 
 
 	function _on(el, event, fn) {
-		el.addEventListener(event, function (e) {
-			if (fn(e)) {
-				e.preventDefault();
-				e.stopImmediatePropagation();
-			}
-		}, false);
+		el.addEventListener(event, fn, false);
 	}
 
 
