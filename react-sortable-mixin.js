@@ -97,7 +97,11 @@
 						_activeComponent = this;
 					}
 					else if (name === 'onAdd' || name === 'onUpdate') {
-						evt.from.insertBefore(evt.item, _nextSibling);
+						if (_nextSibling.parentNode) {
+							_nextSibling.parentNode.insertBefore(evt.item, _nextSibling);
+						} else {
+							evt.from.appendChild(evt.item);
+						}
 
 						var newState = {},
 							remoteState = {},
